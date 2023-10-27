@@ -1,5 +1,6 @@
 SHELL=/bin/bash
 
+
 .PHONY: install
 install:
 	go install github.com/osspkg/devtool@latest
