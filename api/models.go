@@ -6,21 +6,27 @@
 package api
 
 import (
+	"bytes"
 	"fmt"
 )
 
 //go:generate easyjson
 
 //easyjson:json
-type KVModel struct {
-	Key   string   `json:"key"`
-	Value RawValue `json:"value,omitempty"`
+type EntityKV struct {
+	Key   string   `json:"k"`
+	Value RawValue `json:"v,omitempty"`
 }
 
 //easyjson:json
-type KVListModel []KVModel
+type EntitiesKV []EntityKV
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var (
+	esc   = []byte("\\\"")
+	unesc = []byte("\"")
+)
 
 type RawValue []byte
 
@@ -28,14 +34,19 @@ func (m RawValue) MarshalJSON() ([]byte, error) {
 	if m == nil {
 		return []byte("null"), nil
 	}
-	return m, nil
+	buf := bytes.NewBuffer(nil)
+	buf.WriteString("\"")
+	buf.Write(bytes.ReplaceAll(m, unesc, esc))
+	buf.WriteString("\"")
+	return buf.Bytes(), nil
 }
 
 func (m *RawValue) UnmarshalJSON(data []byte) error {
 	if m == nil {
 		return fmt.Errorf("json.RawMessage: UnmarshalJSON on nil pointer")
 	}
-	*m = append((*m)[0:0], data...)
+	out := bytes.ReplaceAll(data[1:len(data)-1], esc, unesc)
+	*m = append((*m)[0:0], out...)
 	return nil
 }
 

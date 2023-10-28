@@ -5,8 +5,13 @@
 
 package api
 
+import (
+	"go.osspkg.com/goppy/sdk/errors"
+	"go.osspkg.com/goppy/sdk/netutil/websocket"
+)
+
 const (
-	PathApiV1 = "/api/watch/v1"
+	PathApiV1Watch = "/api/watch/v1"
 )
 
 const (
@@ -20,7 +25,14 @@ const (
 )
 
 const (
-	EventKVSet = 100001
-	EventKVGet = 100002
-	EventKVDel = 100003
+	EventKVGet websocket.EventID = iota + 1
+	EventKVSet
+	EventKVDel
+	EventKVWatch
+	EventKVUnWatch
+	EventKVWatchValue
+)
+
+var (
+	errRequestEmpty = errors.New("request is empty")
 )

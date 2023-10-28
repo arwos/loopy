@@ -6,7 +6,7 @@ require (
 	github.com/mailru/easyjson v0.7.7
 	go.arwos.org/loopy/api v0.0.0-00010101000000-000000000000
 	go.etcd.io/bbolt v1.3.8
-	go.osspkg.com/goppy v0.14.0
+	go.osspkg.com/goppy v0.14.1
 )
 
 require (

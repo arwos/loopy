@@ -20,6 +20,7 @@ func main() {
 	}))
 	app.AddCommand(
 		cli.CommandKVCommon(),
+		cli.CommandTemplate(),
 	)
 	app.Exec()
 }

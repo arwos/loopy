@@ -5,6 +5,10 @@
 
 package server
 
-const (
-	DoneResponse = "ok"
+import "go.osspkg.com/goppy/sdk/errors"
+
+var (
+	errRequestEmpty = errors.New("request is empty")
+
+	doneResponse = "ok"
 )

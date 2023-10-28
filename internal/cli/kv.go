@@ -35,8 +35,8 @@ func CommandKVSet() console.CommandGetter {
 	return console.NewCommand(func(setter console.CommandSetter) {
 		setter.Setup("set", "Set data to Loop KV")
 		setter.Flag(func(flagsSetter console.FlagsSetter) {
-			flagsSetter.StringVar("server", "127.0.0.1:8080", "Set LoopServer address")
-			flagsSetter.Bool("ssl", "Set use ssl for LoopServer address")
+			flagsSetter.StringVar("server", "127.0.0.1:8080", "Set Loopy address")
+			flagsSetter.Bool("ssl", "Set use ssl for Loopy address")
 		})
 		setter.ArgumentFunc(func(s []string) ([]string, error) {
 			if len(s) != 2 {
@@ -49,9 +49,9 @@ func CommandKVSet() console.CommandGetter {
 			defer cncl()
 			apiCli, err := api.NewKV(&api.Config{HostPort: server, SSL: ssl})
 			console.FatalIfErr(err, "kv init client")
-			res, err := apiCli.Set(ctx, args[0], args[1])
+			err = apiCli.Set(ctx, args[0], args[1])
 			console.FatalIfErr(err, "kv set data")
-			console.Rawf(res)
+			console.Rawf("ok")
 		})
 	})
 }
@@ -60,8 +60,8 @@ func CommandKVGet() console.CommandGetter {
 	return console.NewCommand(func(setter console.CommandSetter) {
 		setter.Setup("get", "Get data from Loop KV")
 		setter.Flag(func(flagsSetter console.FlagsSetter) {
-			flagsSetter.StringVar("server", "127.0.0.1:8080", "Set LoopServer address")
-			flagsSetter.Bool("ssl", "Set use ssl for LoopServer address")
+			flagsSetter.StringVar("server", "127.0.0.1:8080", "Set Loopy address")
+			flagsSetter.Bool("ssl", "Set use ssl for Loopy address")
 		})
 		setter.ArgumentFunc(func(s []string) ([]string, error) {
 			if len(s) != 1 {
@@ -85,8 +85,8 @@ func CommandKVDel() console.CommandGetter {
 	return console.NewCommand(func(setter console.CommandSetter) {
 		setter.Setup("del", "Delete data from Loop KV")
 		setter.Flag(func(flagsSetter console.FlagsSetter) {
-			flagsSetter.StringVar("server", "127.0.0.1:8080", "Set LoopServer address")
-			flagsSetter.Bool("ssl", "Set use ssl for LoopServer address")
+			flagsSetter.StringVar("server", "127.0.0.1:8080", "Set Loopy address")
+			flagsSetter.Bool("ssl", "Set use ssl for Loopy address")
 		})
 		setter.ArgumentFunc(func(s []string) ([]string, error) {
 			if len(s) != 1 {
@@ -99,9 +99,9 @@ func CommandKVDel() console.CommandGetter {
 			defer cncl()
 			apiCli, err := api.NewKV(&api.Config{HostPort: server, SSL: ssl})
 			console.FatalIfErr(err, "kv init client")
-			res, err := apiCli.Delete(ctx, args[0])
+			err = apiCli.Delete(ctx, args[0])
 			console.FatalIfErr(err, "kv delete data")
-			console.Rawf(res)
+			console.Rawf("ok")
 		})
 	})
 }
@@ -110,8 +110,8 @@ func CommandKVSearch() console.CommandGetter {
 	return console.NewCommand(func(setter console.CommandSetter) {
 		setter.Setup("search", "Search data in Loop KV")
 		setter.Flag(func(flagsSetter console.FlagsSetter) {
-			flagsSetter.StringVar("server", "127.0.0.1:8080", "Set LoopServer address")
-			flagsSetter.Bool("ssl", "Set use ssl for LoopServer address")
+			flagsSetter.StringVar("server", "127.0.0.1:8080", "Set Loopy address")
+			flagsSetter.Bool("ssl", "Set use ssl for Loopy address")
 		})
 		setter.ArgumentFunc(func(s []string) ([]string, error) {
 			if len(s) != 1 {
@@ -138,8 +138,8 @@ func CommandKVList() console.CommandGetter {
 	return console.NewCommand(func(setter console.CommandSetter) {
 		setter.Setup("list", "List data in Loop KV")
 		setter.Flag(func(flagsSetter console.FlagsSetter) {
-			flagsSetter.StringVar("server", "127.0.0.1:8080", "Set LoopServer address")
-			flagsSetter.Bool("ssl", "Set use ssl for LoopServer address")
+			flagsSetter.StringVar("server", "127.0.0.1:8080", "Set Loopy address")
+			flagsSetter.Bool("ssl", "Set use ssl for Loopy address")
 		})
 		setter.ArgumentFunc(func(s []string) ([]string, error) {
 			if len(s) != 1 {
