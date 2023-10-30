@@ -6,6 +6,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -14,12 +15,21 @@ import (
 	"go.osspkg.com/goppy/sdk/webutil"
 )
 
-type Client struct {
-	conf *Config
-	cli  *webutil.ClientHttp
-}
+type (
+	_client struct {
+		conf *Config
+		cli  *webutil.ClientHttp
+	}
+	Client interface {
+		Get(ctx context.Context, key string) (string, error)
+		Set(ctx context.Context, key, value string) error
+		Delete(ctx context.Context, key string) error
+		Search(ctx context.Context, prefix string) ([]EntityKV, error)
+		List(ctx context.Context, prefix string) ([]EntityKV, error)
+	}
+)
 
-func NewKV(c *Config) (*Client, error) {
+func NewKV(c *Config) (Client, error) {
 	opts := make([]webutil.ClientHttpOption, 0, 2)
 	if len(c.AuthToken) > 0 {
 		opts = append(opts, webutil.ClientHttpOptionHeaders(AuthTokenHeaderName, c.AuthToken))
@@ -31,13 +41,13 @@ func NewKV(c *Config) (*Client, error) {
 		return nil, err
 	}
 
-	return &Client{
+	return &_client{
 		cli:  cli,
 		conf: c,
 	}, nil
 }
 
-func (v *Client) buildUri(path string) string {
+func (v *_client) buildUri(path string) string {
 	uri := &url.URL{
 		Path:   path,
 		Host:   v.conf.HostPort,
@@ -65,21 +75,19 @@ func clientHttpOptionCodec() webutil.ClientHttpOption {
 			}
 		},
 		func(code int, _ string, body []byte, out interface{}) error {
-			switch code {
-			case 200, 500:
-				switch v := out.(type) {
-				case *[]byte:
-					*v = append(*v, body...)
-					return nil
-				case json.Unmarshaler:
-					return v.UnmarshalJSON(body)
-				case *string:
-					*v = string(body)
-					return nil
-				default:
-					return fmt.Errorf("unknown response format %T", out)
-				}
+			switch v := out.(type) {
+			case *[]byte:
+				*v = append(*v, body...)
+				return nil
+			case json.Unmarshaler:
+				return v.UnmarshalJSON(body)
+			case *string:
+				*v = string(body)
+				return nil
 			default:
+				if code == 200 {
+					return nil
+				}
 				return fmt.Errorf("%d %s\n%s", code, http.StatusText(code), string(body))
 			}
 		},

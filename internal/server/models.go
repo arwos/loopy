@@ -13,13 +13,16 @@ import (
 )
 
 //easyjson:json
-type KVModel struct {
-	Key   string       `json:"key"`
-	Value api.RawValue `json:"value,omitempty"`
+type EntitiesKV []EntityKV
+
+//easyjson:json
+type EntityKV struct {
+	Key   string       `json:"k"`
+	Value api.RawValue `json:"v,omitempty"`
 }
 
-func (v *KVModel) toKVItem() db.KVItem {
-	kvi := db.KVItem{
+func (v EntityKV) ToDB() db.EntityKV {
+	kvi := db.EntityKV{
 		Key: []byte(v.Key),
 	}
 	if v.Value != nil {
@@ -27,7 +30,18 @@ func (v *KVModel) toKVItem() db.KVItem {
 	}
 	return kvi
 }
-func (v *KVModel) fromKVItem(item db.KVItem) {
+
+func (v *EntityKV) FromDB(item db.EntityKV) {
 	v.Key = string(item.Key)
-	v.Value = item.Value
+	if len(item.Value) == 0 {
+		v.Value = nil
+	} else {
+		v.Value = item.Value
+	}
+}
+
+func (v *EntityKV) UseEmptyValue() {
+	if v.Value != nil {
+		v.Value = nil
+	}
 }

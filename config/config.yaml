@@ -1,0 +1,13 @@
+env: dev
+level: 4
+log: /var/log/loopy.log
+
+http:
+    main:
+        addr: 127.0.0.1:9500
+
+debug:
+    addr: 127.0.0.1:12000
+
+database:
+    folder: /var/lib/loopy/database

@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"fmt"
 
+	"go.arwos.org/loopy/internal/pkg/utils"
 	"go.etcd.io/bbolt"
 )
 
@@ -17,52 +18,32 @@ var (
 	kvSep    = []byte("/")
 )
 
-type KVItem struct {
+type EntityKV struct {
 	Key   []byte
 	Value []byte
 }
 
-func (v KVItem) Buckets() [][]byte {
-	return bucketsFromKey(v.Key)
+func (v EntityKV) Buckets() [][]byte {
+	return utils.BucketsFromKey(v.Key, kvSep)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-func bucketsFromKey(v []byte) [][]byte {
-	return bytes.Split(v, kvSep)
-}
-
-func keyPath(v [][]byte) []byte {
-	return append(bytes.Join(v, kvSep), kvSep...)
-}
-
-func extend(b ...[]byte) []byte {
-	count := 0
-	for _, item := range b {
-		count += len(item)
-	}
-	result := make([]byte, 0, count)
-	for _, item := range b {
-		result = append(result, item...)
-	}
-	return result
-}
-
-func eachKV(buk *bbolt.Bucket, bukName []byte, bukPath []byte) []KVItem {
+func eachKV(buk *bbolt.Bucket, bukName []byte, bukPath []byte) []EntityKV {
 	nbuk := buk.Bucket(bukName)
 	if nbuk == nil {
 		return nil
 	}
-	bukPath = extend(bukPath, bukName, kvSep)
-	result := make([]KVItem, 0, 10)
+	bukPath = utils.BytesExtend(bukPath, bukName, kvSep)
+	result := make([]EntityKV, 0, 10)
 	cur := nbuk.Cursor()
 	for k, v := cur.First(); k != nil; k, v = cur.Next() {
 		if v == nil {
 			result = append(result, eachKV(nbuk, k, bukPath)...)
 			continue
 		}
-		result = append(result, KVItem{
-			Key:   extend(bukPath, k),
+		result = append(result, EntityKV{
+			Key:   utils.BytesExtend(bukPath, k),
 			Value: v,
 		})
 	}
@@ -71,7 +52,7 @@ func eachKV(buk *bbolt.Bucket, bukName []byte, bukPath []byte) []KVItem {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-func (v *DB) SetKV(item KVItem) error {
+func (v *DB) SetKV(item EntityKV) error {
 	return v.db.Update(func(tx *bbolt.Tx) error {
 		buk, err := tx.CreateBucketIfNotExists(kvBucket)
 		if err != nil {
@@ -89,7 +70,7 @@ func (v *DB) SetKV(item KVItem) error {
 	})
 }
 
-func (v *DB) GetKV(item *KVItem) error {
+func (v *DB) GetKV(item *EntityKV) error {
 	return v.db.View(func(tx *bbolt.Tx) error {
 		buk := tx.Bucket(kvBucket)
 		if buk == nil {
@@ -108,15 +89,15 @@ func (v *DB) GetKV(item *KVItem) error {
 	})
 }
 
-func (v *DB) SearchKV(prefix []byte) ([]KVItem, error) {
-	result := make([]KVItem, 0, 10)
+func (v *DB) SearchKV(prefix []byte) ([]EntityKV, error) {
+	result := make([]EntityKV, 0, 10)
 	err := v.db.View(func(tx *bbolt.Tx) error {
 		buk := tx.Bucket(kvBucket)
 		if buk == nil {
 			return fmt.Errorf("kv bucket not found")
 		}
-		buks := bucketsFromKey(prefix)
-		bukPath := keyPath(buks[:len(buks)-1])
+		buks := utils.BucketsFromKey(prefix, kvSep)
+		bukPath := utils.BucketKeyPath(buks[:len(buks)-1], kvSep)
 		prefix = buks[len(buks)-1]
 		for _, bukName := range buks[:len(buks)-1] {
 			buk = buk.Bucket(bukName)
@@ -130,8 +111,8 @@ func (v *DB) SearchKV(prefix []byte) ([]KVItem, error) {
 				result = append(result, eachKV(buk, k, bukPath)...)
 				continue
 			}
-			result = append(result, KVItem{
-				Key:   extend(bukPath, k),
+			result = append(result, EntityKV{
+				Key:   utils.BytesExtend(bukPath, k),
 				Value: v,
 			})
 		}
@@ -143,16 +124,16 @@ func (v *DB) SearchKV(prefix []byte) ([]KVItem, error) {
 	return result, nil
 }
 
-func (v *DB) ListKV(prefix []byte) ([]KVItem, error) {
+func (v *DB) ListKV(prefix []byte) ([]EntityKV, error) {
 	prefix = bytes.TrimRight(prefix, string(kvSep))
-	result := make([]KVItem, 0, 10)
+	result := make([]EntityKV, 0, 10)
 	err := v.db.View(func(tx *bbolt.Tx) error {
 		buk := tx.Bucket(kvBucket)
 		if buk == nil {
 			return fmt.Errorf("kv bucket not found")
 		}
-		buks := bucketsFromKey(prefix)
-		bukPath := keyPath(buks)
+		buks := utils.BucketsFromKey(prefix, kvSep)
+		bukPath := utils.BucketKeyPath(buks, kvSep)
 		for _, bukName := range buks {
 			buk = buk.Bucket(bukName)
 			if buk == nil {
@@ -162,14 +143,14 @@ func (v *DB) ListKV(prefix []byte) ([]KVItem, error) {
 		cur := buk.Cursor()
 		for k, v := cur.First(); k != nil; k, v = cur.Next() {
 			if v == nil {
-				result = append(result, KVItem{
-					Key:   extend(bukPath, k, kvSep),
+				result = append(result, EntityKV{
+					Key:   utils.BytesExtend(bukPath, k, kvSep),
 					Value: nil,
 				})
 				continue
 			}
-			result = append(result, KVItem{
-				Key:   extend(bukPath, k),
+			result = append(result, EntityKV{
+				Key:   utils.BytesExtend(bukPath, k),
 				Value: v,
 			})
 		}
@@ -181,7 +162,7 @@ func (v *DB) ListKV(prefix []byte) ([]KVItem, error) {
 	return result, nil
 }
 
-func (v *DB) DelKV(item KVItem) error {
+func (v *DB) DelKV(item EntityKV) error {
 	return v.db.Update(func(tx *bbolt.Tx) error {
 		buk, err := tx.CreateBucketIfNotExists(kvBucket)
 		if err != nil {
