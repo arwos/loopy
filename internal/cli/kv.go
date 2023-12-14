@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"go.arwos.org/loopy/api"
-	"go.osspkg.com/goppy/sdk/console"
+	"go.osspkg.com/goppy/console"
 )
 
 func CommandKVCommon() console.CommandGetter {
@@ -128,7 +128,7 @@ func CommandKVSearch() console.CommandGetter {
 			console.FatalIfErr(err, "kv search data")
 			for _, re := range res {
 				console.Rawf(">> %s", re.Key)
-				console.Rawf(re.Value.String())
+				console.Rawf("%+v", re.ValueStrOrNull())
 			}
 		})
 	})
@@ -156,7 +156,7 @@ func CommandKVList() console.CommandGetter {
 			console.FatalIfErr(err, "kv list data")
 			for _, re := range res {
 				console.Rawf(">> %s", re.Key)
-				console.Rawf(re.Value.String())
+				console.Rawf("%+v", re.ValueStrOrNull())
 			}
 		})
 	})

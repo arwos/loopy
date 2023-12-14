@@ -1,3 +1,17 @@
 Hello '{{key "users/demo"}}'
 
 {{key "k1/aaa/bbb"}}
+
+-- {{key_or_default "k1/aaa22/bbb22" "bbb22"}} --
+-- {{key_or_default "key/1" "1"}} --
+-- {{key_or_default "key/2" "2"}} --
+-- {{key_or_default "key/3" "3"}} --
+-- {{key_or_default "key/4" "4"}} --
+-- {{key_or_default "key/5" "5"}} --
+-- {{key_or_default "key/6" "6"}} --
+-- {{key_or_default "key/7" "7"}} --
+-- {{key_or_default "key/8" "8"}} --
+
+{{range $id, $data := tree "k1/"}}
+id: {{$id}} key: {{$data.Key}} val: {{$data.Value}}
+{{end}}

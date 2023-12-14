@@ -1,24 +1,62 @@
+/*
+ *  Copyright (c) 2023 Mikhail Knyazhev <markus621@gmail.com>. All rights reserved.
+ *  Use of this source code is governed by a BSD-3-Clause license that can be found in the LICENSE file.
+ */
+
 package cachekeys
 
-import "go.osspkg.com/goppy/sdk/iosync"
+import "go.osspkg.com/goppy/iosync"
 
 type (
 	Value struct {
 		Key   string
-		Value []byte
+		Value *string
 	}
 	Map struct {
-		data map[string][]byte
-		bus  chan Value
-		mux  iosync.Lock
+		data    map[string]*string
+		bus     chan Value
+		withBus bool
+		mux     iosync.Lock
+	}
+
+	MapGetter interface {
+		Get(key string) (value *string)
+		Has(key string) (ok bool)
+		Each(call func(key string, value *string))
+	}
+
+	MapSetter interface {
+		Set(key string, value *string)
+		Del(key string)
+	}
+
+	Mapper interface {
+		MapGetter
+		MapSetter
+	}
+
+	MapperWithBus interface {
+		Bus() <-chan Value
+		MapGetter
+		MapSetter
 	}
 )
 
-func New() *Map {
+func NewWithBus() MapperWithBus {
 	return &Map{
-		data: make(map[string][]byte, 100),
-		bus:  make(chan Value, 1000),
-		mux:  iosync.NewLock(),
+		data:    make(map[string]*string, 100),
+		bus:     make(chan Value, 1000),
+		withBus: true,
+		mux:     iosync.NewLock(),
+	}
+}
+
+func NewWithoutBus() Mapper {
+	return &Map{
+		data:    make(map[string]*string, 100),
+		bus:     make(chan Value, 1000),
+		withBus: false,
+		mux:     iosync.NewLock(),
 	}
 }
 
@@ -26,29 +64,30 @@ func (v *Map) Bus() <-chan Value {
 	return v.bus
 }
 
-func (v *Map) toBus(key string, value []byte) {
+func (v *Map) toBus(key string, value *string) {
+	if !v.withBus {
+		return
+	}
 	select {
 	case v.bus <- Value{Key: key, Value: value}:
 	default:
 	}
 }
 
-func (v *Map) Set(key string, value []byte) {
+func (v *Map) Set(key string, value *string) {
 	v.mux.Lock(func() {
-		tmp := make([]byte, 0, len(value))
-		copy(tmp, value)
-		v.data[key] = tmp
+		v.data[key] = value
 		v.toBus(key, value)
 	})
 }
 
-func (v *Map) Get(key string) (out []byte) {
+func (v *Map) Get(key string) (value *string) {
 	v.mux.RLock(func() {
-		value, ok := v.data[key]
+		d, ok := v.data[key]
 		if !ok {
 			return
 		}
-		out = append(out, value...)
+		value = d
 	})
 	return
 }
@@ -56,6 +95,15 @@ func (v *Map) Get(key string) (out []byte) {
 func (v *Map) Has(key string) (ok bool) {
 	v.mux.RLock(func() {
 		_, ok = v.data[key]
+	})
+	return
+}
+
+func (v *Map) Each(call func(key string, value *string)) {
+	v.mux.RLock(func() {
+		for key, val := range v.data {
+			call(key, val)
+		}
 	})
 	return
 }

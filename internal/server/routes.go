@@ -8,12 +8,13 @@ package server
 import (
 	"go.arwos.org/loopy/api"
 	"go.osspkg.com/goppy/plugins"
-	"go.osspkg.com/goppy/plugins/web"
+	"go.osspkg.com/goppy/web"
+	"go.osspkg.com/goppy/ws"
 )
 
 var Plugin = plugins.Plugin{
 	Inject: New,
-	Resolve: func(r web.RouterPool, c *AppV1, ws web.WebsocketServer) {
+	Resolve: func(r web.RouterPool, c *AppV1, ws ws.WebsocketServer) {
 		router := r.Main()
 
 		c.SetBroadcastHandler(ws.SendEvent)

@@ -5,54 +5,27 @@
 
 package api
 
-import (
-	"bytes"
-	"fmt"
-)
-
 //go:generate easyjson
 
 //easyjson:json
-type EntityKV struct {
-	Key   string   `json:"k"`
-	Value RawValue `json:"v,omitempty"`
-}
-
-//easyjson:json
-type EntitiesKV []EntityKV
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-var (
-	esc   = []byte("\\\"")
-	unesc = []byte("\"")
+type (
+	EntitiesKV []EntityKV
+	EntityKV   struct {
+		Key string  `json:"k"`
+		Val *string `json:"v"`
+	}
 )
 
-type RawValue []byte
-
-func (m RawValue) MarshalJSON() ([]byte, error) {
-	if m == nil {
-		return []byte("null"), nil
-	}
-	buf := bytes.NewBuffer(nil)
-	buf.WriteString("\"")
-	buf.Write(bytes.ReplaceAll(m, unesc, esc))
-	buf.WriteString("\"")
-	return buf.Bytes(), nil
-}
-
-func (m *RawValue) UnmarshalJSON(data []byte) error {
-	if m == nil {
-		return fmt.Errorf("json.RawMessage: UnmarshalJSON on nil pointer")
-	}
-	out := bytes.ReplaceAll(data[1:len(data)-1], esc, unesc)
-	*m = append((*m)[0:0], out...)
-	return nil
-}
-
-func (m RawValue) String() string {
-	if m == nil {
+func (v EntityKV) ValueStrOrNull() string {
+	if v.Val == nil {
 		return "null"
 	}
-	return string(m)
+	return *v.Val
+}
+
+func (v EntityKV) Value() string {
+	if v.Val == nil {
+		return ""
+	}
+	return *v.Val
 }

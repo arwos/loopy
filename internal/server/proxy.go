@@ -1,11 +1,16 @@
+/*
+ *  Copyright (c) 2023 Mikhail Knyazhev <markus621@gmail.com>. All rights reserved.
+ *  Use of this source code is governed by a BSD-3-Clause license that can be found in the LICENSE file.
+ */
+
 package server
 
 import (
 	"net/http"
 
-	"go.osspkg.com/goppy/plugins/web"
-	"go.osspkg.com/goppy/sdk/log"
-	"go.osspkg.com/goppy/sdk/netutil/websocket"
+	"go.osspkg.com/goppy/web"
+	"go.osspkg.com/goppy/ws/server"
+	"go.osspkg.com/goppy/xlog"
 )
 
 type Props struct {
@@ -14,8 +19,8 @@ type Props struct {
 	Log    func(key string, err error, suffix string)
 }
 
-func (v *AppV1) ProxyWS(call func(p *Props) error) func(websocket.Response, websocket.Request, websocket.Meta) error {
-	return func(w websocket.Response, r websocket.Request, _ websocket.Meta) error {
+func (v *AppV1) ProxyWS(call func(p *Props) error) func(server.Response, server.Request, server.Meta) error {
+	return func(w server.Response, r server.Request, _ server.Meta) error {
 		return call(&Props{
 			Decode: func(in interface{}) error {
 				return r.Decode(in)
@@ -24,7 +29,7 @@ func (v *AppV1) ProxyWS(call func(p *Props) error) func(websocket.Response, webs
 				w.Encode(in)
 			},
 			Log: func(key string, err error, suffix string) {
-				v.log.WithFields(log.Fields{
+				v.log.WithFields(xlog.Fields{
 					"key": key,
 					"err": err.Error(),
 				}).Warnf("ws %s key error", suffix)
@@ -43,7 +48,7 @@ func (v *AppV1) ProxyRest(call func(p *Props) error) func(ctx web.Context) {
 				ctx.JSON(http.StatusOK, in)
 			},
 			Log: func(key string, err error, suffix string) {
-				v.log.WithFields(log.Fields{
+				v.log.WithFields(xlog.Fields{
 					"key": key,
 					"err": err.Error(),
 				}).Warnf("rest %s key error", suffix)

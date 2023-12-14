@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"go.etcd.io/bbolt"
-	"go.osspkg.com/goppy/sdk/app"
-	"go.osspkg.com/goppy/sdk/iofile"
+	"go.osspkg.com/goppy/iofile"
+	"go.osspkg.com/goppy/xc"
 )
 
 const databaseName = "loop.db"
@@ -28,7 +28,7 @@ func New(c *Config) *DB {
 	}
 }
 
-func (v *DB) Up(_ app.Context) error {
+func (v *DB) Up(_ xc.Context) error {
 	if !iofile.Exist(v.conf.Folder) {
 		if err := os.MkdirAll(v.conf.Folder, 0744); err != nil {
 			return err

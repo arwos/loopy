@@ -1,11 +1,17 @@
+/*
+ *  Copyright (c) 2023 Mikhail Knyazhev <markus621@gmail.com>. All rights reserved.
+ *  Use of this source code is governed by a BSD-3-Clause license that can be found in the LICENSE file.
+ */
+
 package server
 
 import (
 	"go.arwos.org/loopy/api"
-	"go.osspkg.com/goppy/sdk/netutil/websocket"
+	"go.osspkg.com/goppy/ws/event"
+	"go.osspkg.com/goppy/ws/server"
 )
 
-func (v *AppV1) Broadcast(key string, eid websocket.EventID, m interface{}) {
+func (v *AppV1) Broadcast(key string, eid event.Id, m interface{}) {
 	cids := v.hub.GetClients(key)
 	if len(cids) == 0 {
 		return
@@ -13,17 +19,17 @@ func (v *AppV1) Broadcast(key string, eid websocket.EventID, m interface{}) {
 	v.bh(eid, m, cids...)
 }
 
-func (v *AppV1) KVWatchV1(w websocket.Response, r websocket.Request, m websocket.Meta) error {
-	var data EntitiesKV
-	if err := r.Decode(&data); err != nil {
+func (v *AppV1) KVWatchV1(w server.Response, r server.Request, m server.Meta) error {
+	var req EntitiesKV
+	if err := r.Decode(&req); err != nil {
 		return err
 	}
-	if len(data) == 0 {
+	if len(req) == 0 {
 		return errRequestEmpty
 	}
 
-	keys := make([]string, 0, len(data))
-	for _, datum := range data {
+	keys := make([]string, 0, len(req))
+	for _, datum := range req {
 		keys = append(keys, datum.Key)
 	}
 
@@ -33,16 +39,21 @@ func (v *AppV1) KVWatchV1(w websocket.Response, r websocket.Request, m websocket
 		})
 	}
 
-	for i := 0; i < len(data); i++ {
-		entity := data[i].ToDB()
-		if err := v.db.GetKV(&entity); err != nil {
-			(&data[i]).UseEmptyValue()
-		} else {
-			(&data[i]).FromDB(entity)
+	resp := make(EntitiesKV, 0, len(req)*2)
+	for i := 0; i < len(req); i++ {
+		entity := req[i].ToDB()
+		list, err := v.db.SearchKV(entity.Key)
+		if err != nil {
+			continue
+		}
+		for _, kv := range list {
+			item := EntityKV{}
+			item.FromDB(kv)
+			resp = append(resp, item)
 		}
 	}
 	v.hub.Add(m.ConnectID(), keys)
-	w.EncodeEvent(api.EventKVWatchValue, data)
+	w.EncodeEvent(api.EventKVWatchValue, resp)
 
 	return nil
 }

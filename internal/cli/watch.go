@@ -6,45 +6,61 @@
 package cli
 
 import (
-	"context"
+	"os"
 	"strings"
+	"time"
 
 	"go.arwos.org/loopy/api"
 	"go.arwos.org/loopy/internal/pkg/tmpl"
-	"go.osspkg.com/goppy/sdk/console"
-	"go.osspkg.com/goppy/sdk/iosync"
-	"go.osspkg.com/goppy/sdk/log"
-	"go.osspkg.com/goppy/sdk/syscall"
+	"go.osspkg.com/goppy/console"
+	"go.osspkg.com/goppy/iosync"
+	"go.osspkg.com/goppy/syscall"
+	"go.osspkg.com/goppy/xc"
+	"go.osspkg.com/goppy/xlog"
 )
 
 func CommandTemplate() console.CommandGetter {
 	return console.NewCommand(func(setter console.CommandSetter) {
-		setter.Setup("template", "Update template with Loop KV")
+		setter.Setup("template", "Update template with Loop")
 		setter.Flag(func(fs console.FlagsSetter) {
 			fs.StringVar("server", "127.0.0.1:8080", "Set Loopy address")
-			fs.Bool("ssl", "Set use ssl for Loopy address")
+			fs.StringVar("pid", "/tmp/loopy_template.pid", "Set Loopy PID file")
+			fs.IntVar("uptime", 5, "Template update check interval")
+			fs.Bool("ssl", "Set to use SSL for Loopy address")
 		})
-		setter.ExecFunc(func(args []string, server string, ssl bool) {
-			logger := log.Default()
+		setter.ExecFunc(func(args []string, server, pidfile string, uptime int64, ssl bool) {
+			console.FatalIfErr(syscall.Pid(pidfile), "Write PID file %s", pidfile)
+
+			logger := xlog.Default()
+			logger.SetOutput(os.Stdout)
+			logger.SetLevel(xlog.LevelDebug)
+			logger.SetFormatter(xlog.NewFormatString())
+
 			wg := iosync.NewGroup()
-			ctx, cncl := context.WithCancel(context.TODO())
-			cli, err := api.NewWatch(ctx, &api.Config{SSL: ssl, HostPort: server}, logger)
+			closeCtx := xc.New()
+			openCtx := xc.New()
+
+			cli, err := api.NewWatch(closeCtx.Context(), &api.Config{SSL: ssl, HostPort: server}, logger)
 			console.FatalIfErr(err, "Connect to server %s", server)
+			cli.AfterOpened(openCtx.Close)
+			cli.AfterClosed(closeCtx.Close)
+
 			t := tmpl.New(logger)
 			cli.KeyHandler(func(e api.EntitiesKV) {
 				for _, kv := range e {
-					t.SetKey(kv.Key, string(kv.Value))
+					t.SetKey(kv.Key, kv.Val)
 				}
 			})
 			wg.Background(func() {
-				if err := cli.Open(); err != nil {
-					console.Errorf("Open connect to Loopy: %v", err.Error())
+				if err0 := cli.Open(); err0 != nil {
+					console.Errorf("Open connect to Loopy: %v", err0.Error())
 				}
-				cncl()
 			})
-			t.KeysHandler(func(keys ...string) {
-				cli.KeySubscribe(keys...)
+			<-openCtx.Done()
+			t.KeysHandler(func(key string) {
+				cli.KeySubscribe(key)
 			})
+
 			for _, arg := range args {
 				f := strings.Split(arg, ":")
 				if len(f) != 2 {
@@ -52,9 +68,9 @@ func CommandTemplate() console.CommandGetter {
 				}
 				console.FatalIfErr(t.Add(f[0], f[1]), "Add file path template")
 			}
-			t.Watch(ctx)
-			go syscall.OnStop(cncl)
-			<-ctx.Done()
+			go syscall.OnStop(closeCtx.Close)
+			t.Watch(closeCtx, time.Duration(uptime)*time.Second)
+			cli.Close()
 			wg.Wait()
 		})
 	})

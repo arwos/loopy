@@ -8,25 +8,24 @@ package server
 //go:generate easyjson
 
 import (
-	"go.arwos.org/loopy/api"
 	"go.arwos.org/loopy/internal/pkg/db"
 )
 
 //easyjson:json
-type EntitiesKV []EntityKV
-
-//easyjson:json
-type EntityKV struct {
-	Key   string       `json:"k"`
-	Value api.RawValue `json:"v,omitempty"`
-}
+type (
+	EntitiesKV []EntityKV
+	EntityKV   struct {
+		Key   string  `json:"k"`
+		Value *string `json:"v"`
+	}
+)
 
 func (v EntityKV) ToDB() db.EntityKV {
 	kvi := db.EntityKV{
 		Key: []byte(v.Key),
 	}
 	if v.Value != nil {
-		kvi.Value = v.Value
+		kvi.Value = []byte(*v.Value)
 	}
 	return kvi
 }
@@ -36,7 +35,8 @@ func (v *EntityKV) FromDB(item db.EntityKV) {
 	if len(item.Value) == 0 {
 		v.Value = nil
 	} else {
-		v.Value = item.Value
+		s := string(item.Value)
+		v.Value = &s
 	}
 }
 
@@ -45,3 +45,14 @@ func (v *EntityKV) UseEmptyValue() {
 		v.Value = nil
 	}
 }
+
+//easyjson:json
+type (
+	EntitiesService []EntityService
+	EntityService   struct {
+		Name    string   `json:"n"`
+		Address string   `json:"a,omitempty"`
+		Tags    []string `json:"t,omitempty"`
+		Health  string   `json:"h,omitempty"`
+	}
+)

@@ -7,7 +7,7 @@ package main
 
 import (
 	"go.arwos.org/loopy/internal/cli"
-	"go.osspkg.com/goppy/sdk/console"
+	"go.osspkg.com/goppy/console"
 )
 
 func main() {

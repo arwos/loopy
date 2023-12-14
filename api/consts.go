@@ -6,8 +6,8 @@
 package api
 
 import (
-	"go.osspkg.com/goppy/sdk/errors"
-	"go.osspkg.com/goppy/sdk/netutil/websocket"
+	"go.osspkg.com/goppy/errors"
+	"go.osspkg.com/goppy/ws/event"
 )
 
 const (
@@ -25,7 +25,7 @@ const (
 )
 
 const (
-	EventKVGet websocket.EventID = iota + 1
+	EventKVGet event.Id = iota + 1
 	EventKVSet
 	EventKVDel
 	EventKVWatch

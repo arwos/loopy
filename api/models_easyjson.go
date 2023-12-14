@@ -39,8 +39,14 @@ func easyjsonD2b7633eDecodeGoArwosOrgLoopyApi(in *jlexer.Lexer, out *EntityKV) {
 		case "k":
 			out.Key = string(in.String())
 		case "v":
-			if data := in.Raw(); in.Ok() {
-				in.AddError((out.Value).UnmarshalJSON(data))
+			if in.IsNull() {
+				in.Skip()
+				out.Val = nil
+			} else {
+				if out.Val == nil {
+					out.Val = new(string)
+				}
+				*out.Val = string(in.String())
 			}
 		default:
 			in.SkipRecursive()
@@ -61,10 +67,14 @@ func easyjsonD2b7633eEncodeGoArwosOrgLoopyApi(out *jwriter.Writer, in EntityKV) 
 		out.RawString(prefix[1:])
 		out.String(string(in.Key))
 	}
-	if len(in.Value) != 0 {
+	{
 		const prefix string = ",\"v\":"
 		out.RawString(prefix)
-		out.Raw((in.Value).MarshalJSON())
+		if in.Val == nil {
+			out.RawString("null")
+		} else {
+			out.String(string(*in.Val))
+		}
 	}
 	out.RawByte('}')
 }
@@ -101,7 +111,7 @@ func easyjsonD2b7633eDecodeGoArwosOrgLoopyApi1(in *jlexer.Lexer, out *EntitiesKV
 		in.Delim('[')
 		if *out == nil {
 			if !in.IsDelim(']') {
-				*out = make(EntitiesKV, 0, 1)
+				*out = make(EntitiesKV, 0, 2)
 			} else {
 				*out = EntitiesKV{}
 			}
