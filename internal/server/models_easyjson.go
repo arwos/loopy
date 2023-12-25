@@ -17,7 +17,124 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer(in *jlexer.Lexer, out *EntityKV) {
+func easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer(in *jlexer.Lexer, out *EntityService) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "n":
+			out.Name = string(in.String())
+		case "a":
+			out.Address = string(in.String())
+		case "t":
+			if in.IsNull() {
+				in.Skip()
+				out.Tags = nil
+			} else {
+				in.Delim('[')
+				if out.Tags == nil {
+					if !in.IsDelim(']') {
+						out.Tags = make([]string, 0, 4)
+					} else {
+						out.Tags = []string{}
+					}
+				} else {
+					out.Tags = (out.Tags)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v1 string
+					v1 = string(in.String())
+					out.Tags = append(out.Tags, v1)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
+		case "h":
+			out.Health = string(in.String())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer(out *jwriter.Writer, in EntityService) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"n\":"
+		out.RawString(prefix[1:])
+		out.String(string(in.Name))
+	}
+	if in.Address != "" {
+		const prefix string = ",\"a\":"
+		out.RawString(prefix)
+		out.String(string(in.Address))
+	}
+	if len(in.Tags) != 0 {
+		const prefix string = ",\"t\":"
+		out.RawString(prefix)
+		{
+			out.RawByte('[')
+			for v2, v3 := range in.Tags {
+				if v2 > 0 {
+					out.RawByte(',')
+				}
+				out.String(string(v3))
+			}
+			out.RawByte(']')
+		}
+	}
+	if in.Health != "" {
+		const prefix string = ",\"h\":"
+		out.RawString(prefix)
+		out.String(string(in.Health))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v EntityService) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v EntityService) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *EntityService) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *EntityService) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer(l, v)
+}
+func easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer1(in *jlexer.Lexer, out *EntityKV) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -39,8 +156,14 @@ func easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer(in *jlexer.Lexer, out *
 		case "k":
 			out.Key = string(in.String())
 		case "v":
-			if data := in.Raw(); in.Ok() {
-				in.AddError((out.Value).UnmarshalJSON(data))
+			if in.IsNull() {
+				in.Skip()
+				out.Value = nil
+			} else {
+				if out.Value == nil {
+					out.Value = new(string)
+				}
+				*out.Value = string(in.String())
 			}
 		default:
 			in.SkipRecursive()
@@ -52,7 +175,7 @@ func easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer(in *jlexer.Lexer, out *
 		in.Consumed()
 	}
 }
-func easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer(out *jwriter.Writer, in EntityKV) {
+func easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer1(out *jwriter.Writer, in EntityKV) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -61,10 +184,14 @@ func easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer(out *jwriter.Writer, in
 		out.RawString(prefix[1:])
 		out.String(string(in.Key))
 	}
-	if len(in.Value) != 0 {
+	{
 		const prefix string = ",\"v\":"
 		out.RawString(prefix)
-		out.Raw((in.Value).MarshalJSON())
+		if in.Value == nil {
+			out.RawString("null")
+		} else {
+			out.String(string(*in.Value))
+		}
 	}
 	out.RawByte('}')
 }
@@ -72,27 +199,27 @@ func easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer(out *jwriter.Writer, in
 // MarshalJSON supports json.Marshaler interface
 func (v EntityKV) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer(&w, v)
+	easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v EntityKV) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer(w, v)
+	easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *EntityKV) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer(&r, v)
+	easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *EntityKV) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer(l, v)
+	easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer1(l, v)
 }
-func easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer1(in *jlexer.Lexer, out *EntitiesKV) {
+func easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer2(in *jlexer.Lexer, out *EntitiesService) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		in.Skip()
@@ -101,17 +228,17 @@ func easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer1(in *jlexer.Lexer, out 
 		in.Delim('[')
 		if *out == nil {
 			if !in.IsDelim(']') {
-				*out = make(EntitiesKV, 0, 1)
+				*out = make(EntitiesService, 0, 0)
 			} else {
-				*out = EntitiesKV{}
+				*out = EntitiesService{}
 			}
 		} else {
 			*out = (*out)[:0]
 		}
 		for !in.IsDelim(']') {
-			var v1 EntityKV
-			(v1).UnmarshalEasyJSON(in)
-			*out = append(*out, v1)
+			var v4 EntityService
+			(v4).UnmarshalEasyJSON(in)
+			*out = append(*out, v4)
 			in.WantComma()
 		}
 		in.Delim(']')
@@ -120,16 +247,82 @@ func easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer1(in *jlexer.Lexer, out 
 		in.Consumed()
 	}
 }
-func easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer1(out *jwriter.Writer, in EntitiesKV) {
+func easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer2(out *jwriter.Writer, in EntitiesService) {
 	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 		out.RawString("null")
 	} else {
 		out.RawByte('[')
-		for v2, v3 := range in {
-			if v2 > 0 {
+		for v5, v6 := range in {
+			if v5 > 0 {
 				out.RawByte(',')
 			}
-			(v3).MarshalEasyJSON(out)
+			(v6).MarshalEasyJSON(out)
+		}
+		out.RawByte(']')
+	}
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v EntitiesService) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer2(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v EntitiesService) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer2(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *EntitiesService) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer2(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *EntitiesService) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer2(l, v)
+}
+func easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer3(in *jlexer.Lexer, out *EntitiesKV) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		in.Skip()
+		*out = nil
+	} else {
+		in.Delim('[')
+		if *out == nil {
+			if !in.IsDelim(']') {
+				*out = make(EntitiesKV, 0, 2)
+			} else {
+				*out = EntitiesKV{}
+			}
+		} else {
+			*out = (*out)[:0]
+		}
+		for !in.IsDelim(']') {
+			var v7 EntityKV
+			(v7).UnmarshalEasyJSON(in)
+			*out = append(*out, v7)
+			in.WantComma()
+		}
+		in.Delim(']')
+	}
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer3(out *jwriter.Writer, in EntitiesKV) {
+	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+		out.RawString("null")
+	} else {
+		out.RawByte('[')
+		for v8, v9 := range in {
+			if v8 > 0 {
+				out.RawByte(',')
+			}
+			(v9).MarshalEasyJSON(out)
 		}
 		out.RawByte(']')
 	}
@@ -138,23 +331,23 @@ func easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer1(out *jwriter.Writer, i
 // MarshalJSON supports json.Marshaler interface
 func (v EntitiesKV) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer1(&w, v)
+	easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer3(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v EntitiesKV) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer1(w, v)
+	easyjsonD2b7633eEncodeGoArwosOrgLoopyInternalServer3(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *EntitiesKV) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer1(&r, v)
+	easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer3(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *EntitiesKV) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer1(l, v)
+	easyjsonD2b7633eDecodeGoArwosOrgLoopyInternalServer3(l, v)
 }

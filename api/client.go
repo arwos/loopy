@@ -12,13 +12,13 @@ import (
 	"net/http"
 	"net/url"
 
-	"go.osspkg.com/goppy/sdk/webutil"
+	"go.osspkg.com/goppy/web"
 )
 
 type (
 	_client struct {
 		conf *Config
-		cli  *webutil.ClientHttp
+		cli  *web.ClientHttp
 	}
 	Client interface {
 		Get(ctx context.Context, key string) (string, error)
@@ -30,12 +30,12 @@ type (
 )
 
 func NewKV(c *Config) (Client, error) {
-	opts := make([]webutil.ClientHttpOption, 0, 2)
+	opts := make([]web.ClientHttpOption, 0, 2)
 	if len(c.AuthToken) > 0 {
-		opts = append(opts, webutil.ClientHttpOptionHeaders(AuthTokenHeaderName, c.AuthToken))
+		opts = append(opts, web.ClientHttpOptionHeaders(AuthTokenHeaderName, c.AuthToken))
 	}
 	opts = append(opts, clientHttpOptionCodec())
-	cli := webutil.NewClientHttp(opts...)
+	cli := web.NewClientHttp(opts...)
 
 	if err := c.Validate(); err != nil {
 		return nil, err
@@ -59,8 +59,8 @@ func (v *_client) buildUri(path string) string {
 	return uri.String()
 }
 
-func clientHttpOptionCodec() webutil.ClientHttpOption {
-	return webutil.ClientHttpOptionCodec(
+func clientHttpOptionCodec() web.ClientHttpOption {
+	return web.ClientHttpOptionCodec(
 		func(in interface{}) (body []byte, contentType string, err error) {
 			switch v := in.(type) {
 			case []byte:

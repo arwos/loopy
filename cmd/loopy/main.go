@@ -9,7 +9,9 @@ import (
 	"go.arwos.org/loopy/internal/pkg/db"
 	"go.arwos.org/loopy/internal/server"
 	"go.osspkg.com/goppy"
-	"go.osspkg.com/goppy/plugins/web"
+	"go.osspkg.com/goppy/web"
+	"go.osspkg.com/goppy/ws"
+	"go.osspkg.com/goppy/xdns"
 )
 
 func main() {
@@ -17,7 +19,8 @@ func main() {
 	app.Plugins(
 		web.WithHTTP(),
 		web.WithHTTPDebug(),
-		web.WithWebsocketServer(),
+		ws.WithWebsocketServer(),
+		xdns.WithDNSServer(),
 	)
 	app.Plugins(
 		server.Plugin,

@@ -36,7 +36,7 @@ pre-commite: setup lint build tests
 ci: install setup lint build tests
 
 run_local_server:
-	go run cmd/loop/main.go --config=config/config.dev.yaml
+	go run cmd/loop/main.go -race --config=config/config.dev.yaml
 
 run_local_cli:
 	go run cmd/loopcli/main.go --server=127.0.0.1:9500 kv set "k1/k2/k3" "{\"data\":\"aaa\"}"
@@ -51,9 +51,9 @@ run_local_cli:
 	go run cmd/loopcli/main.go --server=127.0.0.1:9500 kv list "k1/bbb/"
 	go run cmd/loopcli/main.go --server=127.0.0.1:9500 kv list "users/"
 
-run_local_cli_watch:
+run_local_template:
 	go run cmd/loopcli/main.go --server=127.0.0.1:9500 kv set "users/demo" "Mike"
-	go run cmd/loopcli/main.go --server=127.0.0.1:9500 template \
+	go run cmd/loopcli/main.go -race --server=127.0.0.1:9500 template \
 		test_data/template.tmpl:test_data/template.out
 run_local_cli_watch_data:
 	go run cmd/loopcli/main.go --server=127.0.0.1:9500 kv set "users/demo" "Mike1"

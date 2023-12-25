@@ -21,14 +21,14 @@ func (v *_client) Get(ctx context.Context, key string) (string, error) {
 	if len(data) == 0 {
 		return "", errRequestEmpty
 	}
-	return data[0].Value.String(), nil
+	return data[0].ValueStrOrNull(), nil
 }
 
 func (v *_client) Set(ctx context.Context, key, value string) error {
 	data := make(EntitiesKV, 0, 1)
 	data = append(data, EntityKV{
-		Key:   key,
-		Value: []byte(value),
+		Key: key,
+		Val: &value,
 	})
 	return v.cli.Call(ctx, http.MethodPut, v.buildUri(PathApiV1KV), &data, nil)
 }

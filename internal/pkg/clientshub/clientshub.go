@@ -1,7 +1,14 @@
+/*
+ *  Copyright (c) 2023 Mikhail Knyazhev <markus621@gmail.com>. All rights reserved.
+ *  Use of this source code is governed by a BSD-3-Clause license that can be found in the LICENSE file.
+ */
+
 package clientshub
 
 import (
-	"go.osspkg.com/goppy/sdk/iosync"
+	"strings"
+
+	"go.osspkg.com/goppy/iosync"
 )
 
 type Hub struct {
@@ -58,11 +65,11 @@ func (v *Hub) Del(cid string, keys []string) {
 
 func (v *Hub) GetClients(key string) (out []string) {
 	v.mux.RLock(func() {
-		km, ok := v.keys[key]
-		if !ok {
-			return
+		for k, km := range v.keys {
+			if key == k || strings.HasPrefix(key, k) {
+				out = append(out, km.Get()...)
+			}
 		}
-		out = km.Get()
 	})
 	return
 }

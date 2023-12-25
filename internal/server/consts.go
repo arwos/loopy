@@ -5,7 +5,7 @@
 
 package server
 
-import "go.osspkg.com/goppy/sdk/errors"
+import "go.osspkg.com/goppy/errors"
 
 var (
 	errRequestEmpty = errors.New("request is empty")

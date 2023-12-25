@@ -9,5 +9,9 @@ http:
 debug:
     addr: 127.0.0.1:12000
 
+dns:
+    addr: 0.0.0.0:9553
+    timeout: 5s
+
 database:
     folder: /var/lib/loopy/database
