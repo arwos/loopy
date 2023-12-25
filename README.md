@@ -21,7 +21,7 @@ loppy --config=./config.yaml
 ### Work with template
 
 ```shell
-loopcli --server=127.0.0.1:9500 template \
+loopycli --server=127.0.0.1:9500 template \
     test_data/template.tmpl:test_data/template.out \
     test_data/template2.tmpl:test_data/template2.out
 ```
@@ -47,21 +47,21 @@ index: {{$index}} key: {{$data.Key}} val: {{$data.Value}}
 
 * Set key
 ```shell
-loopcli --server=127.0.0.1:9500 kv set "key/name" "key_value"
+loopycli --server=127.0.0.1:9500 kv set "key/name" "key_value"
 ```
 * Get key
 ```shell
-loopcli --server=127.0.0.1:9500 kv get "key/name"
+loopycli --server=127.0.0.1:9500 kv get "key/name"
 ```
 * Delete key
 ```shell
-loopcli --server=127.0.0.1:9500 kv del "key/name"
+loopycli --server=127.0.0.1:9500 kv del "key/name"
 ```
 * List key by prefix (with empty value)
 ```shell
-loopcli --server=127.0.0.1:9500 kv list "key/"
+loopycli --server=127.0.0.1:9500 kv list "key/"
 ```
 * Search key by prefix (without empty value)
 ```shell
-loopcli --server=127.0.0.1:9500 kv search "key/"
+loopycli --server=127.0.0.1:9500 kv search "key/"
 ```
