@@ -2,7 +2,7 @@ module go.arwos.org/loopy
 
 go 1.20
 
-replace go.arwos.org/loopy/api => ./api
+//replace go.arwos.org/loopy/api => ./api
 
 require (
 	github.com/mailru/easyjson v0.7.7
