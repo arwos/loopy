@@ -5,7 +5,7 @@ Loopy is designed to store and manage keys and values that are used by various s
 ## Install with go
 
 ```shell
-go install github.com/arwos/loopy/...@latest
+go install go.arwos.org/loopy/...@latest
 ```
 
 ## Server
