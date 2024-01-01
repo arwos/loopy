@@ -12,16 +12,16 @@ require (
 	go.osspkg.com/goppy/console v0.1.0
 	go.osspkg.com/goppy/errors v0.1.0
 	go.osspkg.com/goppy/iofile v0.1.3
-	go.osspkg.com/goppy/iosync v0.1.2
+	go.osspkg.com/goppy/iosync v0.1.4
 	go.osspkg.com/goppy/plugins v0.1.1
 	go.osspkg.com/goppy/routine v0.1.2
 	go.osspkg.com/goppy/syscall v0.1.1
-	go.osspkg.com/goppy/web v0.1.5
+	go.osspkg.com/goppy/web v0.1.8
 	go.osspkg.com/goppy/ws v0.1.6
 	go.osspkg.com/goppy/xc v0.1.0
 	go.osspkg.com/goppy/xdns v0.1.0
-	go.osspkg.com/goppy/xlog v0.1.4
-	go.osspkg.com/goppy/xtest v0.1.2
+	go.osspkg.com/goppy/xlog v0.1.6
+	go.osspkg.com/goppy/xtest v0.1.3
 )
 
 require (
@@ -30,7 +30,7 @@ require (
 	github.com/miekg/dns v1.1.57 // indirect
 	go.osspkg.com/algorithms v1.3.0 // indirect
 	go.osspkg.com/goppy/app v0.1.5 // indirect
-	go.osspkg.com/goppy/ioutil v0.1.0 // indirect
+	go.osspkg.com/goppy/ioutil v0.1.1 // indirect
 	go.osspkg.com/goppy/xnet v0.1.1 // indirect
 	go.osspkg.com/static v1.4.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
