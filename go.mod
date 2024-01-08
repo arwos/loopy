@@ -21,7 +21,7 @@ require (
 	go.osspkg.com/goppy/xc v0.1.0
 	go.osspkg.com/goppy/xdns v0.1.0
 	go.osspkg.com/goppy/xlog v0.1.4
-	go.osspkg.com/goppy/xtest v0.1.2
+	go.osspkg.com/goppy/xtest v0.1.4
 )
 
 require (
